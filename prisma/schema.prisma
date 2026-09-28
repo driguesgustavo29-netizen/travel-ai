@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  trips        Trip[]
+  searches     Search[]
+  favorites    Favorite[]
+}
+model Trip {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  origin       String
+  destination  String
+  startDate    DateTime
+  endDate      DateTime
+  travelers    Int
+  budget       Float
+  tripType     String
+  totalPrice   Float
+  flightDetails  Json
+  hotelDetails   Json
+  aiJustification String
+  savings       Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  favorites    Favorite[]
+}
+model Search {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  origin       String
+  destination  String?
+  startDate    DateTime
+  endDate      DateTime
+  travelers    Int
+  budget       Float
+  tripType     String
+  resultSummary Json?
+  createdAt    DateTime @default(now())
+  @@index([userId])
+  @@index([createdAt])
+}
+model Favorite {
+  id        String @id @default(cuid())
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tripId    String
+  trip      Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId, tripId])
+}
